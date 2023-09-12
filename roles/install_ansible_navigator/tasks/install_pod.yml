@@ -1,0 +1,11 @@
+---
+- name: "Pull podman image - {{ install_ansible_navigator_podman_item.name }}"
+  containers.podman.podman_image:
+    name: "{{ install_ansible_navigator_podman_item.name }}"
+    tag: "{{ install_ansible_navigator_podman_item.tag }}"
+  become_user: "{{ v_install_ansible_navigator_username }}"
+  become: true
+  register: result_pod_install
+  until: "result_pod_install is not failed"
+  retries: 10
+  delay: 10

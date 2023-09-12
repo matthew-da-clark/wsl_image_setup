@@ -1,0 +1,77 @@
+---
+- name: Create the /dev/mqueue directory
+  ansible.builtin.file:
+    path: /dev/mqueue
+    state: directory
+    mode: '0755'
+    owner: "root"
+    group: "root"
+
+- name: Create Initial Ansible Directory
+  ansible.builtin.file:
+    path: "{{ install_ansible_navigator_folder_item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_install_ansible_navigator_username }}"
+    group: "{{ v_install_ansible_navigator_username }}"
+  loop:
+    - "{{ v_install_ansible_navigator_rootdir }}"
+    - "{{ v_install_ansible_navigator_rootdir }}/ansible_navigator"
+    - "{{ v_install_ansible_navigator_rootdir }}/ansible_navigator/settings"
+    - "{{ v_install_ansible_navigator_rootdir }}/ansible_navigator/logs"
+    - "{{ v_install_ansible_navigator_rootdir }}/ansible_navigator/artifacts"
+  loop_control:
+    loop_var: install_ansible_navigator_folder_item
+
+- name: Copy ansible-navigator.yml to default settings
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/ansible-navigator.yml.j2"
+    dest: "{{ v_install_ansible_navigator_rootdir }}/ansible_navigator/settings/.ansible-navigator.yml"
+    mode: '0644'
+    owner: "{{ v_install_ansible_navigator_username }}"
+    group: "{{ v_install_ansible_navigator_username }}"
+
+- name: Ensure export path in profile
+  ansible.builtin.lineinfile:
+    dest: "/home/{{ v_install_ansible_navigator_username }}/.profile"
+    state: present
+    regexp: '^%export PATH=/home/{{ v_install_ansible_navigator_username }}/.local/bin'
+    line: 'export PATH=/home/{{ v_install_ansible_navigator_username }}/.local/bin:$PATH'
+    insertbefore: BOF
+
+- name: Setting ansible navigator settings path
+  ansible.builtin.lineinfile:
+    dest: "/home/{{ v_install_ansible_navigator_username }}/.profile"
+    state: present
+    regexp: '^%export ANSIBLE_NAVIGATOR_CONFIG='
+    line: "export ANSIBLE_NAVIGATOR_CONFIG={{ v_install_ansible_navigator_rootdir }}/ansible_navigator/settings/.ansible-navigator.yml"
+    insertbefore: BOF
+
+- name: Install python3-pip
+  ansible.builtin.apt:
+    pkg:
+      - python3-pip
+
+- name: Install ansible-navigator python package
+  ansible.builtin.pip:
+    name: ansible-navigator
+    extra_args: --user
+  become_user: "{{ v_install_ansible_navigator_username }}"
+  become: true
+
+- name: "Pull podman image - {{ install_ansible_navigator_podman_item.name }}"
+  ansible.builtin.include_tasks:
+    file: install_pod.yml
+  loop: "{{ v_install_ansible_navigator_pods_to_pull }}"
+  loop_control:
+    loop_var: install_ansible_navigator_podman_item
+
+- name: Run source command as user
+  ansible.builtin.shell: |
+    set -o pipefail && source ~/.profile
+  args:
+    executable: /bin/bash
+  become_user: "{{ v_install_ansible_navigator_username }}"
+  become: true
+  register: source_response
+  changed_when: source_response.rc != 0

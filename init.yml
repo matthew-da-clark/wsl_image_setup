@@ -90,6 +90,17 @@
       ansible.builtin.include_role:
         name: install_podman_for_ubuntu
 
+    - name: Install Ansible Navigator
+      ansible.builtin.include_role:
+        name: install_ansible_navigator
+      vars:
+        v_install_ansible_navigator_username: "{{ dev_username }}"
+        v_install_ansible_navigator_setting_container_engine: "podman"    # Would require coding to include docker
+        v_install_ansible_navigator_setting_execution_image: "{{ ansible_navigator_default_eei }}"
+        v_install_ansible_navigator_setting_pull_policy: "{{ ansible_navigator_pull_policy }}"
+        v_install_ansible_navigator_pods_to_pull: "{{ ansible_pods_to_pull }}"
+        v_install_ansible_navigator_rootdir: "{{ root_folder_for_dev }}"
+
     - name: Install packer
       ansible.builtin.include_role:
         name: install_packer

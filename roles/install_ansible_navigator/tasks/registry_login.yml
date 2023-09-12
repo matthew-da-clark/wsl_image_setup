@@ -1,0 +1,13 @@
+---
+- name: Login to registry
+  containers.podman.podman_login:
+    username: "{{ install_ansible_navigator_registry_item.username }}"
+    password: "{{ install_ansible_navigator_registry_item.password }}"
+    registry: "{{ install_ansible_navigator_registry_item.registry }}"
+  become_user: "{{ v_install_ansible_navigator_username }}"
+  become: true
+  register: result_registry_login
+  until: "result_registry_login is not failed"
+  retries: 5
+  delay: 10
+  no_log: true

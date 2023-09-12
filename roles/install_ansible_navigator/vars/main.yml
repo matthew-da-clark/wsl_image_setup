@@ -1,0 +1,8 @@
+---
+# vars file for install_ansible_navigator
+v_install_ansible_navigator_username: "required"
+v_install_ansible_navigator_setting_container_engine: "required"
+v_install_ansible_navigator_setting_execution_image: "required"
+v_install_ansible_navigator_setting_pull_policy: "required"
+v_install_ansible_navigator_pods_to_pull: []
+v_install_ansible_navigator_rootdir: "required"
