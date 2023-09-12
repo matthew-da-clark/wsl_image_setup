@@ -26,6 +26,10 @@ ansible_navigator_pull_policy: "never"
 root_folder_for_ansible_lint_config: "{{ root_folder_for_dev }}/ansible_lint"
 root_folder_for_sonar_lint_config: "{{ root_folder_for_dev }}/sonar_lint"
 ansible_lint_config_file: "{{ root_folder_for_ansible_lint_config }}/.ansible-lint"
+ansible_pod_registries:
+  - { registry: "{{ registry.redhat.io",
+      username: "{{ lookup('env', 'ANSIBLE_REDHAT_USER') }}",
+      password: "{{ lookup('env', 'ANSIBLE_REDHAT_TOKEN') }}" }
 ansible_pods_to_pull:
   - { name: registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8, tag: "1.0.0-393" }
 sentinel_download_url: "https://releases.hashicorp.com/sentinel/0.23.0/sentinel_0.23.0_linux_amd64.zip"

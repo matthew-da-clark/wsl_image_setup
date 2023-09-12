@@ -4,6 +4,9 @@ if (( $EUID != 0 )); then
   exit
 fi
 
+# Remove user created in base
+deluser --remove-home matt
+
 # WSL Default Settings
 echo '[boot]' > /etc/wsl.conf
 echo 'systemd=true' >> /etc/wsl.conf

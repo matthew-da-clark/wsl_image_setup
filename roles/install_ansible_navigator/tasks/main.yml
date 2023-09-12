@@ -59,12 +59,30 @@
   become_user: "{{ v_install_ansible_navigator_username }}"
   become: true
 
+- name: "Login to registry"
+  ansible.builtin.include_tasks:
+    file: registry_login.yml
+  loop: "{{ v_install_ansible_navigator_pod_registries }}"
+  loop_control:
+    loop_var: install_ansible_navigator_registry_item
+  no_log: true
+
 - name: "Pull podman image - {{ install_ansible_navigator_podman_item.name }}"
   ansible.builtin.include_tasks:
     file: install_pod.yml
   loop: "{{ v_install_ansible_navigator_pods_to_pull }}"
   loop_control:
     loop_var: install_ansible_navigator_podman_item
+
+- name: Logout of registry
+  containers.podman.podman_logout:
+    registry: "{{ install_ansible_navigator_registry_item.registry }}"
+  loop: "{{ v_install_ansible_navigator_pod_registries }}"
+  loop_control:
+    loop_var: install_ansible_navigator_registry_item
+  no_log: true
+  become_user: "{{ v_install_ansible_navigator_username }}"
+  become: true
 
 - name: Run source command as user
   ansible.builtin.shell: |
