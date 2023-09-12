@@ -89,6 +89,8 @@
     - name: Install podman for Ubuntu
       ansible.builtin.include_role:
         name: install_podman_for_ubuntu
+      vars:
+        v_install_podman_for_ubuntu_username: "{{ dev_username }}"
 
     - name: Install Ansible Navigator
       ansible.builtin.include_role:

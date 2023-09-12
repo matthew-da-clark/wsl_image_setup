@@ -36,7 +36,7 @@
 
 - name: Setting XDG_RUNTIME_DIR environment variable in profile
   ansible.builtin.lineinfile:
-    dest: "/home/{{ v_install_ansible_navigator_username }}/.profile"
+    dest: "/home/{{ v_install_podman_for_ubuntu_username }}/.profile"
     state: present
     regexp: '^%export XDG_RUNTIME_DIR='
     line: "export XDG_RUNTIME_DIR=/run/user/$(id -u)"
@@ -44,7 +44,7 @@
 
 - name: Setting XDG_RUNTIME_DIR environment variable in bashrc
   ansible.builtin.lineinfile:
-    dest: "/home/{{ v_install_ansible_navigator_username }}/.bashrc"
+    dest: "/home/{{ v_install_podman_for_ubuntu_username }}/.bashrc"
     state: present
     regexp: '^%export XDG_RUNTIME_DIR='
     line: "export XDG_RUNTIME_DIR=/run/user/$(id -u)"
