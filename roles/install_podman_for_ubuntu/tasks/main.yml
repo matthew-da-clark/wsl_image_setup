@@ -33,3 +33,19 @@
   until: "result_podman_install is not failed"
   retries: 10
   delay: 10
+
+- name: Setting XDG_RUNTIME_DIR environment variable in profile
+  ansible.builtin.lineinfile:
+    dest: "/home/{{ v_install_ansible_navigator_username }}/.profile"
+    state: present
+    regexp: '^%export XDG_RUNTIME_DIR='
+    line: "export XDG_RUNTIME_DIR=/run/user/$(id -u)"
+    insertbefore: BOF
+
+- name: Setting XDG_RUNTIME_DIR environment variable in bashrc
+  ansible.builtin.lineinfile:
+    dest: "/home/{{ v_install_ansible_navigator_username }}/.bashrc"
+    state: present
+    regexp: '^%export XDG_RUNTIME_DIR='
+    line: "export XDG_RUNTIME_DIR=/run/user/$(id -u)"
+    insertbefore: BOF
