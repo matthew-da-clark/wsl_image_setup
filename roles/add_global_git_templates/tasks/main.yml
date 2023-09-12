@@ -1,0 +1,88 @@
+---
+
+- name: Create Initial Global Template Folder
+  ansible.builtin.file:
+    path: "{{ v_add_global_git_templates_rootdir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_add_global_git_templates_username }}"
+    group: "{{ v_add_global_git_templates_username }}"
+
+- name: Get Git Template Repos
+  ansible.builtin.git:
+    repo: "{{ add_global_git_templates_repo_item.repo }}"
+    version: "{{ add_global_git_templates_repo_item.version }}"
+    dest: "{{ add_global_git_templates_repo_item.dest }}"
+  environment:
+    GIT_TERMINAL_PROMPT: "0"    # reports "terminal prompts disabled" on missing password
+  become_user: "{{ v_add_global_git_templates_username }}"
+  become: true
+  loop: "{{ v_add_global_git_templates_repos }}"
+  loop_control:
+    loop_var: add_global_git_templates_repo_item
+
+- name: Create Empty Git Hooks folder on Template Repos  # Ensures global hooks are then used
+  ansible.builtin.file: # Note: This doesnt copy structure if used with git init
+    path: "{{ add_global_git_templates_repo_item.dest }}/.git/hooks"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_add_global_git_templates_username }}"
+    group: "{{ v_add_global_git_templates_username }}"
+  become_user: "{{ v_add_global_git_templates_username }}"
+  become: true
+  loop: "{{ v_add_global_git_templates_repos }}"
+  loop_control:
+    loop_var: add_global_git_templates_repo_item
+
+- name: Create Default Git Template Directories - For Git Init Users
+  ansible.builtin.file:
+    path: "{{ add_global_git_templates_default_template_item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_add_global_git_templates_username }}"
+    group: "{{ v_add_global_git_templates_username }}"
+  become_user: "{{ v_add_global_git_templates_username }}"
+  become: true
+  loop:
+    - "{{ v_add_global_git_templates_default }}"
+    - "{{ v_add_global_git_templates_default }}/info"
+    - "{{ v_add_global_git_templates_default }}/hooks"
+  loop_control:
+    loop_var: add_global_git_templates_default_template_item
+
+- name: Find Default Git Hook Files
+  ansible.builtin.find:
+    paths: /usr/share/git-core/templates/hooks/
+    patterns: '*'
+  register: add_global_git_templates_default_githook_files_found
+
+- name: Get Paths Of Found Files
+  ansible.builtin.set_fact:
+    add_global_git_templates_githook_files: "{{ add_global_git_templates_default_githook_files_found.files | map(attribute='path') | list | flatten(1) }}"
+
+- name: Touch again the same file, but dont change times this makes the task idempotent
+  ansible.builtin.copy:
+    src: "{{ add_global_git_templates_githook_file_item }}"
+    dest: "{{ v_add_global_git_templates_default }}/hooks/{{ add_global_git_templates_githook_file_item | basename }}"
+    mode: '0755'
+    owner: "{{ v_add_global_git_templates_username }}"
+    group: "{{ v_add_global_git_templates_username }}"
+  loop: "{{ add_global_git_templates_githook_files }}"
+  loop_control:
+    loop_var: add_global_git_templates_githook_file_item
+
+- name: Set Git Config For Global Scope Init Template Directory - Root User
+  community.general.git_config:
+    name: init.templatedir
+    value: "{{ v_add_global_git_templates_default }}"
+    scope: global
+  become: true
+  become_user: "root"
+
+- name: Set Git Config For Global Scope Init Template Directory - Dev User
+  community.general.git_config:
+    name: init.templatedir
+    value: "{{ v_add_global_git_templates_default }}"
+    scope: global
+  become: true
+  become_user: "{{ v_add_global_git_templates_username }}"

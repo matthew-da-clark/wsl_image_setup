@@ -1,0 +1,8 @@
+---
+- name: Copy Visual Studio WSL Workspace File
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/wsl.code-workspace.j2"
+    dest: "{{ v_vs_code_workspace_setup_rootdir }}/.vscode/wsl.code-workspace"
+    mode: '0644'
+    owner: "{{ v_vs_code_workspace_setup_username }}"
+    group: "{{ v_vs_code_workspace_setup_username }}"

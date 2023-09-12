@@ -1,0 +1,6 @@
+---
+# vars file for add_global_git_templates
+v_add_global_git_templates_username: "required"
+v_add_global_git_templates_rootdir: "required"
+v_add_global_git_templates_default: "required"
+v_add_global_git_templates_repos: []

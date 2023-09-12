@@ -1,0 +1,5 @@
+---
+# vars file for create_main_user
+v_create_main_user_admin_group: "required"
+v_create_main_user_username: "required"
+v_create_main_user_rootdir: "required"

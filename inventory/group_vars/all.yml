@@ -1,0 +1,124 @@
+---
+wsl_imagename_version: "Ubuntu.22.04.IaC" # Ideally this be provided by some build process but no where to build WSL image currently
+dev_username: "iacdevusr"
+admin_group: "iacadmin"
+ubuntu_os_product_name: "jammy"
+ssh_known_hosts:
+  - "github.com"
+root_folder_for_dev: "/wsl"
+root_folder_for_workspace: "/git"
+root_folder_for_venvs: "{{ root_folder_for_dev }}/python-virturnenvs"
+root_folder_for_repo: "{{ root_folder_for_dev }}/wsl_image_setup"
+root_folder_for_cronjobs: "{{ root_folder_for_dev }}/cron_jobs"
+git_templates_dir: "{{ root_folder_for_dev }}/global_git_templates"
+wsl_doc_website: "https://github.com/matthew-da-clark"
+ansible_collection_install_list:
+  - amazon.aws
+  - ansible.posix
+  - ansible.utils
+  - ansible.windows
+  - community.general
+  - community.postgresql
+  - community.windows
+  - containers.podman
+ansible_navigator_default_eei: "registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:1.0.0-393"
+ansible_navigator_pull_policy: "never"
+root_folder_for_ansible_lint_config: "{{ root_folder_for_dev }}/ansible_lint"
+root_folder_for_sonar_lint_config: "{{ root_folder_for_dev }}/sonar_lint"
+ansible_lint_config_file: "{{ root_folder_for_ansible_lint_config }}/.ansible-lint"
+ansible_pods_to_pull:
+  - { name: registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8, tag: "1.0.0-393" }
+sentinel_download_url: "https://releases.hashicorp.com/sentinel/0.23.0/sentinel_0.23.0_linux_amd64.zip"
+git_patching_repo:
+  repo: https://github.com/matthew-da-clark/wsl_image_patching.git
+  repo_ssh: git@github.com:matthew-da-clark/wsl_image_patching.git
+  version: main
+  dest: "{{ root_folder_for_dev }}/cron_jobs/playbooks/wsl_image_patching"
+git_repo_to_add:  #  Removed Some of the repos to reduce size of WSL Image and size on consumers machine
+  - { repo_https: https://github.com/matthew-da-clark/wsl_image_setup.git,
+      repo_ssh: git@github.com:matthew-da-clark/wsl_image_setup.git,
+      version: main,
+      dest: "{{ root_folder_for_workspace }}/wsl_image_setup" }
+  - { repo_https: https://github.com/matthew-da-clark/wsl_image_patching.git,
+      repo_ssh: git@github.com:matthew-da-clark/wsl_image_patching.git,
+      version: main,
+      dest: "{{ root_folder_for_workspace }}/wsl_image_patching" }
+  - { repo_https: https://github.com/aws-ia/terraform-aws-control_tower_account_factory.git,
+      repo_ssh: git@github.com:aws-ia/terraform-aws-control_tower_account_factory.git,
+      version: main,
+      dest: "{{ root_folder_for_workspace }}/terraform-aws-control_tower_account_factory" }
+git_template_default: "{{ git_templates_dir }}/wsl_git_default_template"
+git_template_repos:
+  - { repo: https://github.com/matthew-da-clark/ansible_template.git,
+      version: main,
+      dest: "{{ git_templates_dir }}/ansible_template" }
+# Main packages to install into the WSL default env
+npm_packages:
+  - docusaurus
+  - env-cmd
+python_modernized_packages:
+  - ansible-core
+  - ansible-lint
+  - ansible-sign
+  - Babel
+  - boto3
+  - cffi
+  - configparser
+  - dnspython
+  - jmespath
+  - mysql-connector-python
+  - pre-commit
+  - psutil
+  - pywinrm
+  - pywinrm[kerberos]
+  - pycparser
+  - psycopg2-binary
+  - python-memcached
+system_packages:
+  - anacron
+  - default-jre
+  - default-jdk
+  - socat
+  - gnupg
+  - gnupg2
+  - software-properties-common
+  - cron
+  - curl
+  - unzip
+  - wget
+  - expect
+  - python3-pip
+  - mysql-client
+  - gcc
+#  - python-dev   # Python 2 removed in Ubuntu 22.04
+  - python3-dev
+  - ldap-utils
+  - libffi-dev
+  - libssl-dev
+  - libkrb5-dev
+  - krb5-user
+  - python3-kerberos
+  - virtualenv
+  - python3-venv
+  - unzip
+  - sshpass
+  - pwgen
+  - dh-autoreconf
+  - tree
+  - git-flow
+  - dumb-init
+visual_studio_code_color_scheme: "Default Dark+"
+visual_studio_code_ansible_default_execution_environment_image: "{{ ansible_navigator_default_eei }}"
+visual_studio_code_extensions:
+  - "redhat.ansible"
+  - "HashiCorp.terraform"
+  - "ms-azuretools.vscode-docker"
+  - "wholroyd.jinja"
+  - "shd101wyy.markdown-preview-enhanced"
+  - "davidanson.vscode-markdownlint"
+  - "redhat.vscode-yaml"
+  - "eamodio.gitlens"
+  - "quicktype.quicktype"
+  - "SonarSource.sonarlint-vscode"
+playbook_absolutename: "{{ (lookup('file', '/proc/self/cmdline') | regex_replace('\u0000',' ')).split() | select('match','^.*[.]ya?ml$') | list | first }}"
+playbook_basename: "{{ playbook_absolutename | basename }}"

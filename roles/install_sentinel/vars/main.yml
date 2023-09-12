@@ -1,0 +1,4 @@
+---
+# vars file for install_sentinel
+v_install_sentinel_username: "required"
+v_install_sentinel_download_url: "required"

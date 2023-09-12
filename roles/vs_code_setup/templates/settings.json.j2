@@ -1,0 +1,14 @@
+{
+    "workbench.colorTheme": "{{ v_vs_code_setup_color_scheme }}",
+    "files.associations": {
+        "**/*.yml": "ansible",
+        "**/*.yaml": "ansible",
+        "**/execution-environment.yml": "YAML",
+        "**/execution-environment.yaml": "YAML"
+    },
+    "ansible.executionEnvironment.containerEngine": "podman",
+    "ansible.executionEnvironment.image": "{{ v_vs_code_setup_ansible_default_execution_environment_image }}",
+    "ansible.executionEnvironment.enabled": false,
+    "ansible.validation.lint.arguments": "--config-file {{ v_vs_code_setup_ansible_lint_config_file }}",
+    "editor.renderWhitespace": "all"
+}

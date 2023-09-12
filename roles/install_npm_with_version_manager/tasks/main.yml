@@ -1,0 +1,67 @@
+---
+# Documentation for setting up npm on wsl
+# https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl
+- name: Install system dependencies for npm
+  ansible.builtin.apt:
+    pkg:
+      - curl
+
+- name: Download Node Version Manager Install Script
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh"
+    dest: "/tmp/nvm_install.sh"
+    mode: '0775'
+    force: true
+  become_user: "{{ v_install_npm_with_version_manager_username }}"
+  become: true
+
+- name: Execute the command in remote shell; stdout goes to the specified file on the remote
+  ansible.builtin.shell:
+    cmd: /tmp/nvm_install.sh
+  args:
+    executable: /bin/bash
+  register: nvm_version_install_result
+  changed_when: "'nvm is already installed' not in nvm_version_install_result.stdout"
+  become_user: "{{ v_install_npm_with_version_manager_username }}"
+  become: true
+
+- name: Install NPM Version(s)
+  ansible.builtin.shell: |
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    nvm install {{ install_npm_with_version_manager_nodeversion_item }}
+  args:
+    executable: /bin/bash
+  register: npm_version_install_result
+  changed_when: "' already installed.' not in npm_version_install_result.stderr"
+  loop:
+    - "--lts"
+    - "node"
+  loop_control:
+    loop_var: install_npm_with_version_manager_nodeversion_item
+  become_user: "{{ v_install_npm_with_version_manager_username }}"
+  become: true
+
+- name: Setup User npmrc Config File
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/npmrc.j2"
+    dest: "/home/{{ v_install_npm_with_version_manager_username }}/.npmrc"
+    mode: '0600'
+    owner: "{{ v_install_npm_with_version_manager_username }}"
+    group: "{{ v_install_npm_with_version_manager_username }}"
+  become_user: "{{ v_install_npm_with_version_manager_username }}"
+  become: true
+
+# Install not working great for become; will add in a different area.
+# - name: Install specified npm package(s) globally.
+#   community.general.npm:
+#     name: "{{ install_npm_with_version_manager_item }}"
+#     global: true
+#     executable: "/home/iacdevusr/.nvm/versions/node/v18.17.1/lib/node_modules/npm"  # Ideally should have version in a variable.
+#   loop:
+#     - "{{ v_install_npm_with_version_manager_package_list }}"
+#   loop_control:
+#     loop_var: install_npm_with_version_manager_item
+#   become_user: "{{ v_install_npm_with_version_manager_username }}"
+#   become: true

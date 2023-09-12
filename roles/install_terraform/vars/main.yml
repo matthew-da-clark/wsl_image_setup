@@ -1,0 +1,3 @@
+---
+# vars file for install_terraform
+v_install_terraform_apt_repo: "required"

@@ -1,0 +1,4 @@
+---
+# vars file for install_npm_with_version_manager
+v_install_npm_with_version_manager_username: "required"
+v_install_npm_with_version_manager_package_list: []

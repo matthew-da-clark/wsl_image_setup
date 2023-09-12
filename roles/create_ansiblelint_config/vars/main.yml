@@ -1,0 +1,5 @@
+---
+# vars file for create_ansiblelint_config
+v_create_ansiblelint_config_rootdir: "required"
+v_create_ansiblelint_config_full_filename: "required"
+v_create_ansiblelint_config_username: "required"

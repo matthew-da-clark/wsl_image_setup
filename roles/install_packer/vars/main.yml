@@ -1,0 +1,3 @@
+---
+# vars file for install_packer
+v_install_packer_apt_repo: "required"

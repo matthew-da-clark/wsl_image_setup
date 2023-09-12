@@ -1,0 +1,74 @@
+---
+- name: Ensure admin group exists
+  ansible.builtin.group:
+    name: "{{ v_create_main_user_admin_group }}"
+    state: present
+
+- name: Allow admin group to have passwordless sudo
+  ansible.builtin.lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%{{ v_create_main_user_admin_group }}'
+    line: '%{{ v_create_main_user_admin_group }} ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+- name: Create dev user to admin group
+  ansible.builtin.user:
+    name: "{{ v_create_main_user_username }}"
+    expires: -1
+    groups: "{{ v_create_main_user_admin_group }}"
+    shell: /bin/bash
+    append: true
+    state: present
+    createhome: true
+
+- name: Add login script to home directory of user
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/login.sh.j2"
+    dest: "/home/{{ v_create_main_user_username }}/login.sh"
+    mode: '0744'
+    owner: "{{ v_create_main_user_username }}"
+    group: "{{ v_create_main_user_username }}"
+
+- name: Ensure startup script in profile
+  ansible.builtin.lineinfile:
+    dest: "/home/{{ v_create_main_user_username }}/.profile"
+    state: present
+    regexp: '^%~/login.sh'
+    line: '~/login.sh'
+    insertafter: EOF
+
+- name: Fix PowerShell For WSL2 Bash
+  ansible.builtin.lineinfile:
+    dest: "/home/{{ v_create_main_user_username }}/.bashrc"
+    state: present
+    regexp: "{{ create_main_user_line_item.regexp }}"
+    line: "{{ create_main_user_line_item.line }}"
+    insertafter: "{{ create_main_user_line_item.after }}"
+  loop:
+    - line: 'fix_wsl2_interop() {'
+      regexp: '^fix_wsl2_interop() {$'
+      after: EOF
+    - line: '    for i in $(pstree -np -s $$ | grep -o -E "[0-9]+"); do'
+      regexp: '^    for i in $(pstree -np -s $$ | grep -o -E "[0-9]+"); do$'
+      after: '^fix_wsl2_interop() {$'
+    - line: '        if [[ -e "/run/WSL/${i}_interop" ]]; then'
+      regexp: '^        if [[ -e "/run/WSL/${i}_interop" ]]; then$'
+      after: '^    for i in $(pstree -np -s $$ | grep -o -E "[0-9]+"); do$'
+    - line: '            export WSL_INTEROP=/run/WSL/${i}_interop'
+      regexp: '^            export WSL_INTEROP=/run/WSL/${i}_interop$'
+      after: '^        if [[ -e "/run/WSL/${i}_interop" ]]; then$'
+    - line: '        fi'
+      regexp: '^        fi$'
+      after: '^            export WSL_INTEROP=/run/WSL/${i}_interop$'
+    - line: '    done'
+      regexp: '^    done$'
+      after: '^        fi$'
+    - line: '}'
+      regexp: '^}$'
+      after: '^    done$'
+    - line: 'fix_wsl2_interop'
+      regexp: '^fix_wsl2_interop$'
+      after: '^}$'
+  loop_control:
+    loop_var: create_main_user_line_item

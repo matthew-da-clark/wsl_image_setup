@@ -1,0 +1,16 @@
+---
+- name: Create Initial Directory
+  ansible.builtin.file:
+    path: "{{ v_add_test_playbook_rootdir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_add_test_playbook_username }}"
+    group: "{{ v_add_test_playbook_username }}"
+
+- name: Copy test.yml To Directory
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/test.yml"
+    dest: "{{ v_add_test_playbook_rootdir }}/test.yml"
+    mode: '0755'
+    owner: "{{ v_add_test_playbook_username }}"
+    group: "{{ v_add_test_playbook_username }}"

@@ -1,0 +1,28 @@
+---
+- name: Create initial directories for wsl
+  ansible.builtin.file:
+    path: "{{ create_wsl_conf_dir_item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_create_wsl_conf_username }}"
+    group: "{{ v_create_wsl_conf_username }}"
+  loop:
+    - "{{ v_create_wsl_conf_rootdir }}"
+    - "{{ v_create_wsl_conf_rootdir }}/default_settings"
+    - "{{ v_create_wsl_conf_rootdir }}/default_settings/wsl"
+  loop_control:
+    loop_var: create_wsl_conf_dir_item
+
+- name: Copy wsl.conf to default settings
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/wsl.conf.j2"
+    dest: "{{ v_create_wsl_conf_rootdir }}/default_settings/wsl/wsl.conf"
+    mode: '0644'
+    owner: "{{ v_create_wsl_conf_username }}"
+    group: "{{ v_create_wsl_conf_username }}"
+
+- name: Copy wsl.conf to actual settings
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/wsl.conf.j2"
+    dest: /etc/wsl.conf
+    mode: '0644'

@@ -1,0 +1,4 @@
+---
+# vars file for create_wsl_conf
+v_create_wsl_conf_username: "required"
+v_create_wsl_conf_rootdir: "required"

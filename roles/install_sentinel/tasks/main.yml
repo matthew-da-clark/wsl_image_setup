@@ -1,0 +1,14 @@
+---
+- name: Get Sentinel Zip Package
+  ansible.builtin.get_url:
+    url: "{{ v_install_sentinel_download_url }}"
+    dest: /tmp/sentinel.zip
+    mode: '0644'
+    force: true
+
+- name: Extract Sentinel Zip Package
+  ansible.builtin.unarchive:
+    src: /tmp/sentinel.zip
+    dest: "/home/{{ v_install_sentinel_username }}/.local/bin"
+  become: true
+  become_user: "{{ v_install_sentinel_username }}"

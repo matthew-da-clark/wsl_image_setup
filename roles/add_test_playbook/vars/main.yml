@@ -1,0 +1,4 @@
+---
+# vars file for add_test_playbook
+v_add_test_playbook_rootdir: "required"
+v_add_test_playbook_username: "required"

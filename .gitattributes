@@ -1,0 +1,9 @@
+# Force yml filetypes to have unix eols, so Windows does not break them
+# Also for this j2 files since they are all going to Linux based machines
+*.yml text eol=lf
+*.yaml text eol=lf
+*.j2 text eol=lf
+*.sh text eol=lf
+
+# Markdown to have windows forced line-endings
+*.md text eol=crlf

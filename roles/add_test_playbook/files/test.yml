@@ -1,0 +1,13 @@
+---
+- name: Test File Excluded from source control for quick testing
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Get Current User
+      ansible.builtin.command: whoami
+      changed_when: false
+      register: whoami_result
+
+    - name: Show Current User
+      ansible.builtin.debug:
+        var: whoami_result

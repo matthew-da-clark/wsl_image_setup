@@ -1,0 +1,12 @@
+---
+# vars file for vs_code_workspace_setup
+v_vs_code_workspace_setup_username: "required"
+v_vs_code_workspace_setup_rootdir: "required"
+v_vs_code_workspace_setup_root_workspace_dir: "required"
+v_vs_code_workspace_setup_root_setuprepo_dir: "required"
+v_vs_code_workspace_setup_root_patchrepo_dir: "required"
+v_vs_code_workspace_setup_wsl_doc_website: "required"
+v_vs_code_setup_ansible_default_execution_environment_image: "required"
+v_vs_code_setup_ansible_lint_config_file: "required"
+v_vs_code_workspace_setup_color_scheme: "required"
+v_vs_code_workspace_setup_remove_startup_task: false

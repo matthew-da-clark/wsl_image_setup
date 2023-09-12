@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+{% for curr_extension in v_vs_code_setup_extensions %}
+        "{{ curr_extension }}"{% if not loop.last %},{% endif %}
+
+{% endfor %}
+    ]
+}

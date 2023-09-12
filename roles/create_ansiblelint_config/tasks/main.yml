@@ -1,0 +1,16 @@
+---
+- name: Ensure ansible lint directory exists
+  ansible.builtin.file:
+    path: "{{ v_create_ansiblelint_config_rootdir }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_create_ansiblelint_config_username }}"
+    group: "{{ v_create_ansiblelint_config_username }}"
+
+- name: Add ansible-lint config file
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/ansible-lint.j2"
+    dest: "{{ v_create_ansiblelint_config_full_filename }}"
+    mode: '0755'
+    owner: "{{ v_create_ansiblelint_config_username }}"
+    group: "{{ v_create_ansiblelint_config_username }}"

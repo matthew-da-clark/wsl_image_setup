@@ -1,0 +1,107 @@
+{
+	"folders": [
+		{
+			"path": "{{ v_vs_code_workspace_setup_rootdir }}"
+		},
+		{
+			"path": "{{ v_vs_code_workspace_setup_root_workspace_dir }}"
+		}
+	],
+	"settings": {
+		"workbench.colorTheme": "Default Dark+",
+		"editor.renderWhitespace": "all",
+		"files.associations": {
+			"**/*.yml": "ansible",
+			"**/*.yaml": "ansible",
+			"**/execution-environment.yml": "YAML",
+			"**/execution-environment.yaml": "YAML"
+		},
+		"workbench.editorAssociations": {
+			"WSL_WELCOME.md": "vscode.markdown.preview.editor"
+		},
+		"ansible.executionEnvironment.containerEngine": "podman",
+		"ansible.executionEnvironment.image": "{{ v_vs_code_setup_ansible_default_execution_environment_image }}",
+		"ansible.executionEnvironment.enabled": false,
+		"ansible.validation.lint.enabled": true,
+		"ansible.validation.lint.arguments": "--config-file {{ v_vs_code_setup_ansible_lint_config_file }}",
+		"sonarlint.output.showVerboseLogs": true,
+		"sonarlint.output.showAnalyzerLogs": true,
+		"workbench.startupEditor": "welcomePageInEmptyWorkbench",
+		"task.allowAutomaticTasks": "on",
+		"terminal.integrated.cwd": "${fileDirname}",
+		"terminal.integrated.defaultProfile.linux": "Ubuntu bash",
+		"terminal.integrated.profiles.linux": {
+			"bash": {
+				"path": "bash",
+				"icon": "terminal-bash"
+			},
+			"Ubuntu bash": {
+				"path": "bash",
+				"icon": "terminal-ubuntu"
+			},
+			"sh": {
+				"path": "/bin/sh"
+			},
+			"JavaScript Debug Terminal": null,
+			"zsh": null,
+			"fish": null,
+			"tmux": null,
+		}
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Auto-open WSL Welcome file.",
+				"type": "shell",
+				"command": "code {{ v_vs_code_workspace_setup_root_setuprepo_dir }}/documentation/WSL_WELCOME.md",
+				"runOptions": {
+					"runOn": "folderOpen",
+				},
+				"presentation": {
+					"echo": false,
+					"reveal": "silent",
+					"focus": false,
+					"panel": "shared",
+					"showReuseMessage": false,
+					"clear": false,
+					"close": true
+				}
+			},			
+			{
+				"label": "Auto-Open WSL Docs Website",
+				"type": "process",
+				"command": "cmd.exe",
+				"args": [
+					"/C start {{ v_vs_code_workspace_setup_wsl_doc_website }}"
+				],
+				"runOptions": {
+				  "runOn": "folderOpen"
+				},
+				"presentation": {
+					"echo": false,
+					"reveal": "silent",
+					"revealProblems": "never",
+					"focus": false,
+					"panel": "shared",
+					"showReuseMessage": false,
+					"clear": false,
+					"close": true
+				}
+			}{% if not v_vs_code_workspace_setup_remove_startup_task %},
+{% endif %}
+			{% if not v_vs_code_workspace_setup_remove_startup_task %}{
+				"label": "WSL - User First Use Setup",
+				"type":"shell",
+				"command": "cd {{ v_vs_code_workspace_setup_root_patchrepo_dir }} && sudo git pull && cd {{ v_vs_code_workspace_setup_root_setuprepo_dir }} && git pull && ./user_first_use.sh",
+				"presentation": {
+					"reveal": "always",
+					"panel": "dedicated",
+					"focus": true
+				  },
+				"runOptions": { "runOn": "folderOpen" }
+			}
+{% endif %}
+		]
+	}
+}

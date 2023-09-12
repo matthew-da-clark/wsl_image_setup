@@ -1,0 +1,8 @@
+---
+- name: Install Collection With Modules
+  community.general.ansible_galaxy_install:
+    type: collection
+    name: "{{ install_ansible_collections_collection_item }}"
+  loop: "{{ v_install_ansible_collections_collection_list }}"
+  loop_control:
+    loop_var: install_ansible_collections_collection_item

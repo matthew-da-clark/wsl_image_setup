@@ -1,0 +1,13 @@
+#!/bin/bash
+echo Hello {{ v_create_main_user_username }}, welcome, to launch VS Code from here type: code .
+
+# For some reason this directory sometimes disappears
+if [[ ! -e /dev/mqueue ]]; then
+  sudo mkdir /dev/mqueue
+fi
+
+# Ensure crontab is running
+sudo service cron start > /dev/null 2>&1
+
+cd {{ v_create_main_user_rootdir }}
+bash

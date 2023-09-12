@@ -1,0 +1,47 @@
+---
+- name: Create initial directories for vs code
+  ansible.builtin.file:
+    path: "{{ vs_code_setup_dir_item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_vs_code_setup_username }}"
+    group: "{{ v_vs_code_setup_username }}"
+  loop:
+    - "{{ v_vs_code_setup_rootdir }}"
+    - "{{ v_vs_code_setup_rootdir }}/.vscode"
+    - "{{ v_vs_code_setup_rootdir }}/default_settings"
+    - "{{ v_vs_code_setup_rootdir }}/default_settings/vscode"
+  loop_control:
+    loop_var: vs_code_setup_dir_item
+
+- name: Copy extensions.json to default settings
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/extensions.json.j2"
+    dest: "{{ v_vs_code_setup_rootdir }}/default_settings/vscode/extensions.json"
+    mode: '0644'
+    owner: "{{ v_vs_code_setup_username }}"
+    group: "{{ v_vs_code_setup_username }}"
+
+- name: Copy settings.json to default settings
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/settings.json.j2"
+    dest: "{{ v_vs_code_setup_rootdir }}/default_settings/vscode/settings.json"
+    mode: '0644'
+    owner: "{{ v_vs_code_setup_username }}"
+    group: "{{ v_vs_code_setup_username }}"
+
+- name: Copy extensions.json to actual settings
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/extensions.json.j2"
+    dest: "{{ v_vs_code_setup_rootdir }}/.vscode/extensions.json"
+    mode: '0644'
+    owner: "{{ v_vs_code_setup_username }}"
+    group: "{{ v_vs_code_setup_username }}"
+
+- name: Copy settings.json to actual settings
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/settings.json.j2"
+    dest: "{{ v_vs_code_setup_rootdir }}/.vscode/settings.json"
+    mode: '0644'
+    owner: "{{ v_vs_code_setup_username }}"
+    group: "{{ v_vs_code_setup_username }}"

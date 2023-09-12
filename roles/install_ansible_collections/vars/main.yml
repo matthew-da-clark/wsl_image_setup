@@ -1,0 +1,3 @@
+---
+# vars file for install_ansible_collections
+v_install_ansible_collections_collection_list: []

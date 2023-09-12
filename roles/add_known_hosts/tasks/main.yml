@@ -1,0 +1,38 @@
+---
+- name: Create Initial Root SSH Directory
+  ansible.builtin.file:
+    path: "/root/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "root"
+    group: "root"
+
+- name: Add To Known Hosts For Root
+  ansible.builtin.known_hosts:
+    name: "{{ add_known_hosts_host_item }}"
+    state: present
+    key: "{{ lookup('pipe', 'ssh-keyscan ' + add_known_hosts_host_item) }}"
+  become: true
+  become_user: root
+  loop: "{{ v_add_known_hosts_host_list | flatten(1) }}"
+  loop_control:
+    loop_var: add_known_hosts_host_item
+
+- name: Create Initial Root SSH Directory
+  ansible.builtin.file:
+    path: "/home/{{ v_add_known_hosts_dev_username }}/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "{{ v_add_known_hosts_dev_username }}"
+    group: "{{ v_add_known_hosts_dev_username }}"
+
+- name: Add To Known Hosts For User
+  ansible.builtin.known_hosts:
+    name: "{{ add_known_hosts_host_item }}"
+    state: present
+    key: "{{ lookup('pipe', 'ssh-keyscan ' + add_known_hosts_host_item) }}"
+  become: true
+  become_user: "{{ v_add_known_hosts_dev_username }}"
+  loop: "{{ v_add_known_hosts_host_list | flatten(1) }}"
+  loop_control:
+    loop_var: add_known_hosts_host_item

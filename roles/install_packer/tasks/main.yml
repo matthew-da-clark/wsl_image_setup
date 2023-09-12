@@ -1,0 +1,23 @@
+---
+- name: Get Public Key For Hashicorp Repo
+  ansible.builtin.get_url:
+    url: "https://apt.releases.hashicorp.com/gpg"
+    dest: /etc/apt/trusted.gpg.d/hashicorp
+    mode: '0644'
+    timeout: 60
+    force: true
+
+- name: Add the official HashiCorp Linux repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/hashicorp] https://apt.releases.hashicorp.com {{ v_install_packer_apt_repo }}"
+    state: present
+    filename: hashicorp
+
+- name: Update Before Packer Install
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install packer
+  ansible.builtin.apt:
+    pkg:
+      - packer

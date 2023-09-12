@@ -1,0 +1,35 @@
+---
+# Original Instructions from here: https://ansible-navigator.readthedocs.io/en/latest/installation/#setup-windows-subsystem-for-linux-2-with-ubuntu
+# Instructions updated to use artifactory remote versus directly to internet.
+
+- name: Create the /dev/mqueue directory
+  ansible.builtin.file:
+    path: /dev/mqueue
+    state: directory
+    mode: '0755'
+    owner: "root"
+    group: "root"
+
+- name: Update the ubuntu package index - equivalent of "apt-get update"
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install system dependencies for podman
+  ansible.builtin.apt:
+    pkg:
+      - curl
+      - wget
+      - gnupg2
+
+- name: Update the ubuntu package index - equivalent of "apt-get update"
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install podman
+  ansible.builtin.apt:
+    pkg:
+      - podman
+  register: result_podman_install
+  until: "result_podman_install is not failed"
+  retries: 10
+  delay: 10

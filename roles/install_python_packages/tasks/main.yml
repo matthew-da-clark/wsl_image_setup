@@ -1,0 +1,12 @@
+---
+- name: Install python3-pip
+  ansible.builtin.apt:
+    pkg:
+      - python3-pip
+
+- name: Install python packages
+  ansible.builtin.pip:
+    name: "{{ install_python_packages_python_lib_item }}"
+  loop: "{{ v_install_python_packages_install_list }}"
+  loop_control:
+    loop_var: install_python_packages_python_lib_item

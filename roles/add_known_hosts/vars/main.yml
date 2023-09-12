@@ -1,0 +1,4 @@
+---
+# vars file for add_known_hosts
+v_add_known_hosts_host_list: []
+v_add_known_hosts_dev_username: "required"
