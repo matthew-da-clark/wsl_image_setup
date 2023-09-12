@@ -5,5 +5,7 @@
 *.j2 text eol=lf
 *.sh text eol=lf
 
+prepare-commit-msg eol=lf
+
 # Markdown to have windows forced line-endings
 *.md text eol=crlf

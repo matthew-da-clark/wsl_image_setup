@@ -1,0 +1,42 @@
+---
+- name: Create Initial Global Git Hook Folder(s)
+  ansible.builtin.file:
+    path: "{{ add_global_githooks_dir_item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_add_global_githooks_username }}"
+    group: "{{ v_add_global_githooks_username }}"
+  loop:
+    - "{{ v_add_global_githooks_rootdir }}"
+    - "{{ v_add_global_githooks_rootdir }}/global_git_hook"
+    - "{{ v_add_global_githooks_rootdir }}/global_git_hook/hooks"
+  loop_control:
+    loop_var: add_global_githooks_dir_item
+
+- name: Copy Hook Files
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/{{ add_global_githooks_hook_filename_item }}"
+    dest: "{{ v_add_global_githooks_rootdir }}/global_git_hook/hooks/{{ add_global_githooks_hook_filename_item }}"
+    mode: '0775'
+    owner: "{{ v_add_global_githooks_username }}"
+    group: "{{ v_add_global_githooks_username }}"
+  loop:
+    - "prepare-commit-msg"
+  loop_control:
+    loop_var: add_global_githooks_hook_filename_item
+
+- name: Set Git Config For Global Scope Hooks Path - Root User
+  community.general.git_config:
+    name: core.hooksPath
+    value: "{{ v_add_global_githooks_rootdir }}/global_git_hook/hooks"
+    scope: global
+  become: true
+  become_user: "root"
+
+- name: Set Git Config For Global Scope Hooks Path - Dev User
+  community.general.git_config:
+    name: core.hooksPath
+    value: "{{ v_add_global_githooks_rootdir }}/global_git_hook/hooks"
+    scope: global
+  become: true
+  become_user: "{{ v_add_global_githooks_username }}"

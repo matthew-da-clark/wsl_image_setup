@@ -1,0 +1,4 @@
+---
+# vars file for add_global_githooks
+v_add_global_githooks_username: "required"
+v_add_global_githooks_rootdir: "required"

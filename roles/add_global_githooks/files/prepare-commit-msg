@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# The script adds Jira issue key if branch starts with Jira issue key such as
+# feature/MYPROJECT-123_my_feature
+#
+# Commit message is appended with
+#
+# [MYPROJECT-123] my commit message
+
+FILE=$1
+MESSAGE=$(cat $FILE)
+TICKET=[$(git rev-parse --abbrev-ref HEAD | grep -Eo '^(\w+/)+(\w+[-_])?[0-9]+' | grep -Eo '(\w+[-])?[0-9]+' | tr "[:lower:]" "[:upper:]")]
+if [[ $TICKET == "[]" || "$MESSAGE" == "$TICKET"* ]];then
+  exit 0;
+fi
+
+echo "$TICKET $MESSAGE" > $FILE

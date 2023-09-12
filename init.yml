@@ -137,6 +137,13 @@
         v_add_global_git_templates_default: "{{ git_template_default }}"
         v_add_global_git_templates_repos: "{{ git_template_repos }}"
 
+    - name: Add Global Machine Level Git Hooks
+      ansible.builtin.include_role:
+        name: add_global_githooks
+      vars:
+        v_add_global_githooks_username: "{{ dev_username }}"
+        v_add_global_githooks_rootdir: "{{ root_folder_for_dev }}"
+
     - name: Setup VS Code Settings
       ansible.builtin.include_role:
         name: vs_code_setup
