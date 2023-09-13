@@ -1,0 +1,33 @@
+---
+- name: Install ansible collections for user
+  hosts: localhost
+  gather_facts: true
+  tasks:
+    - name: Fail if not executed by root
+      ansible.builtin.command: whoami
+      changed_when: false
+      register: whoami
+      failed_when: '"{{ dev_username }}" not in whoami.stdout'
+
+    - name: Install Ansible Collections - user
+      ansible.builtin.include_role:
+        name: install_ansible_collections
+      vars:
+        v_install_ansible_collections_collection_list: "{{ ansible_collection_install_list }}"
+
+    - name: Fix for ansible-navigator - Install ansible-navigator python package
+      ansible.builtin.pip:
+        name: ansible-navigator
+        extra_args: --user
+
+    - name: Fix for ansible-navigator - Ensure export path in profile
+      ansible.builtin.lineinfile:
+        dest: "/home/{{ dev_username }}/.profile"
+        state: present
+        regexp: '^%export PATH=/home/{{ dev_username }}/.local/bin'
+        line: 'export PATH=/home/{{ dev_username }}/.local/bin:$PATH'
+        insertbefore: BOF
+
+    - name: Install pre-commit
+      ansible.builtin.pip:
+        name: "pre-commit"
