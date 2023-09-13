@@ -1,0 +1,30 @@
+---
+
+- name: Check Python Version 2 - Removed In Ubuntu 22.04
+  ansible.builtin.command:
+    cmd: python --version
+  changed_when: false
+  ignore_errors: true
+  register: python2_version_check_cmd
+  when:
+    - ubuntu_os_product_name == "focal"
+
+- name: Fail if Python v2 not found - Removed In Ubuntu 22.04
+  ansible.builtin.fail:
+    msg: "Unable to find Python Version 2"
+  when:
+    - ubuntu_os_product_name == "focal" and
+      (python2_version_check_cmd.rc != 0 or not (python2_version_check_cmd.stderr | regex_search("^Python 2((\.\d+){0,2}(\.\*)?)$")))
+
+- name: Check Python Version 3
+  ansible.builtin.command:
+    cmd: python3 --version
+  changed_when: false
+  ignore_errors: true
+  register: python3_version_check_cmd
+
+- name: Fail if Python v3 not found
+  ansible.builtin.fail:
+    msg: "Unable to find Python Version 3"
+  when:
+    - python3_version_check_cmd.rc != 0 or not (python3_version_check_cmd.stdout | regex_search("^Python 3((\.\d+){0,2}(\.\*)?)$"))

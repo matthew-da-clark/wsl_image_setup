@@ -1,0 +1,26 @@
+---
+
+- name: Check Terraform Version
+  ansible.builtin.command:
+    cmd: terraform -v
+  changed_when: false
+  ignore_errors: true
+  register: terraform_version
+
+- name: Fail if Terraform not found
+  ansible.builtin.fail:
+    msg: "Unable to find Terraform Version"
+  when:
+    - '"Terraform" not in terraform_version.stdout'
+
+- name: Fail if Terraform not found
+  ansible.builtin.fail:
+    msg: "Unable to find Terraform Version"
+  when:
+    - '"on linux_amd64" not in terraform_version.stdout'
+
+- name: Fail if Terraform not found
+  ansible.builtin.fail:
+    msg: "Unable to find Terraform Version"
+  when:
+    - terraform_version.rc != 0

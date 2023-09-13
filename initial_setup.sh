@@ -48,3 +48,19 @@ ansible-galaxy collection install community.postgresql
 
 ansible-playbook dev_user_install.yml --inventory inventory -vvv
 git config --global --add safe.directory '/wsl/cron_jobs/playbooks/wsl_image_patching'
+
+# Install NPM Packages - Look to move into playbook in the future when can remove failures better
+npm install -g docusaurus --loglevel verbose
+npm install -g env-cmd --loglevel verbose
+
+# Install Default EEI - Move into playbook in the future when have time to deal with issue
+podman pull registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:1.0.0-393
+
+# Need to exit out of WSL and shut it down to ensure proper loading of WSL environment vars
+# Needed for ansible-navigator, sentinel, etc
+cmd.exe /C wsl --terminate Ubuntu.22.04.IaC
+wsl -d Ubuntu.22.04.IaC --user iacdevusr 
+cd /wsl/wsl_image_setup
+
+# Ensure tests all pass - Run as iacdevusr
+ansible-playbook test_build.yml --inventory inventory

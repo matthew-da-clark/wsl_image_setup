@@ -1,0 +1,14 @@
+---
+
+- name: Check Ansible Navigator Version
+  ansible.builtin.command:
+    cmd: ansible-navigator --version
+  changed_when: false
+  ignore_errors: true
+  register: ansible_navigator_version
+
+- name: Fail if Ansible Navigator not found
+  ansible.builtin.fail:
+    msg: "Unable to find Ansible Navigator Version"
+  when:
+    - ansible_navigator_version.rc != 0 or not (ansible_navigator_version.stdout | regex_search("^ansible-navigator (\*|\d+(\.\d+){0,2}(\.\*)?)$"))

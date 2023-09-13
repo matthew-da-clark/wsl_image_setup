@@ -1,0 +1,37 @@
+---
+
+- name: Play - Set Facts For Other Plays
+  hosts: localhost
+  gather_facts: false
+  vars:
+    fail_on_first_failure: false
+    total_tests: 0
+    total_passed: 0
+    total_failed: 0
+  tasks:
+    - name: Find Test Files To Execute
+      ansible.builtin.find:
+        paths: tasks/tests
+        patterns: 'test*.yml,test*.yaml'
+      register: test_files_found
+
+    - name: Get Paths Of Found Files
+      ansible.builtin.set_fact:
+        test_task_files: "{{ test_files_found.files | map(attribute='path') | list | flatten(1) }}"
+
+    - name: Run Tests In Isolation Try/Catch Block
+      block:
+        - name: Run Tests
+          ansible.builtin.include_tasks:
+            file: tasks/outer_block_test.yml
+          loop: "{{ test_task_files }}"
+          loop_control:
+            loop_var: test_task_file
+
+      always:
+        - name: Show Stats
+          ansible.builtin.debug:
+            msg: "Total Passed: {{ total_passed }} Total Failed: {{ total_failed }} Total Tests: {{ total_tests }}
+                  Success Percentage: {{ ((total_passed) | int / (total_tests | int)) * 100 }}%"
+          when:
+            - (total_tests | int) > 0

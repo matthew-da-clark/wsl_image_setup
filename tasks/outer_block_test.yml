@@ -1,0 +1,24 @@
+---
+
+- name: Execute Test Task
+  block:
+    - name: Test Failure
+      ansible.builtin.import_tasks:
+        file: "{{ test_task_file }}"
+
+    - name: Increase Success Count
+      ansible.builtin.set_fact:
+        total_passed: "{{ (total_passed | int) + 1 }}"
+  rescue:
+    - name: Increase Failure Count
+      ansible.builtin.set_fact:
+        total_failed: "{{ (total_failed | int) + 1 }}"
+
+    - name: Fail If Fail On First Failure
+      when: fail_on_first_failure
+      ansible.builtin.fail:
+        msg: "Test Failed - Stopping Tests"
+  always:
+    - name: Increase Total Count
+      ansible.builtin.set_fact:
+        total_tests: "{{ (total_tests | int) + 1 }}"

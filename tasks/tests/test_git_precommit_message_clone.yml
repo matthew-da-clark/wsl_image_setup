@@ -1,0 +1,45 @@
+---
+
+- name: Get Repo To Test
+  ansible.builtin.set_fact:
+    git_repo_to_test: "{{ git_template_repos | first }}"
+
+- name: Test Git Repo To Ensure Able To
+  ansible.builtin.git:
+    repo: "{{ git_repo_to_test.repo }}"
+    dest: /tmp/test-git-repo-clone-hook
+    version: "{{ git_repo_to_test.version }}"
+  environment:
+    GIT_TERMINAL_PROMPT: 0 # reports "terminal prompts disabled" on missing password
+
+- name: Create New Git Repo - Test Pre-Commit Hook For JIRA Issue
+  ansible.builtin.shell:
+    cmd: "cd /tmp/test-git-repo-clone-hook
+
+          git config user.name \"Testing Tester\"
+
+          git config user.email \"test@test.com\"
+
+          git checkout -b feature/TEST-1-Testing-Commit-Msg-Hook
+
+          git commit --allow-empty -m \"Empty-Commit - Test Git Clone Hook\"
+
+          git log --pretty=oneline  --since=1.days"
+  args:
+    executable: /bin/bash
+  changed_when: false == true
+  ignore_errors: true
+  register: git_hook_test_commit_msg_clone_repo
+
+- name: Ensure Testing Directory Doesnt Exist - After Test
+  ansible.builtin.file:
+    path: /tmp/test-git-repo-clone-hook
+    state: absent
+  no_log: true
+  failed_when: false
+
+- name: Fail if JIRA Not Found In Commit
+  ansible.builtin.fail:
+    msg: "Unable to verify git commit hook on clone repo"
+  when:
+    - git_hook_test_commit_msg_clone_repo.rc != 0 or "[TEST-1] Empty-Commit - Test Git Clone Hook" not in git_hook_test_commit_msg_clone_repo.stdout

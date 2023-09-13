@@ -1,0 +1,14 @@
+---
+
+- name: Check Sentinel Version
+  ansible.builtin.command:
+    cmd: sentinel -v
+  changed_when: false
+  ignore_errors: true
+  register: sentinel_version
+
+- name: Fail if Sentinel not found
+  ansible.builtin.fail:
+    msg: "Unable to find Sentinel Version"
+  when:
+    - sentinel_version.rc != 0 or not (sentinel_version.stdout | regex_search("^Sentinel v(\*|\d+(\.\d+){0,2}(\.\*)?)$"))

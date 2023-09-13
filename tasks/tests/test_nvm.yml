@@ -1,0 +1,19 @@
+---
+
+- name: Execute the command in remote shell; stdout goes to the specified file on the remote
+  ansible.builtin.shell: |
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    nvm --version
+  args:
+    executable: /bin/bash
+  changed_when: false == true
+  ignore_errors: true
+  register: nvm_version_check_cmd
+
+- name: Fail if NVM not found
+  ansible.builtin.fail:
+    msg: "Unable to find NVM"
+  when:
+    - nvm_version_check_cmd.rc != 0 or not (nvm_version_check_cmd.stdout | regex_search("^(\*|\d+(\.\d+){0,2}(\.\*)?)$"))

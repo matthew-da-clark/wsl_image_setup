@@ -1,0 +1,15 @@
+---
+
+#  Somewhat silly check since tests are running ansible. However, perhaps if was a remote target
+- name: Check Ansible Version
+  ansible.builtin.command:
+    cmd: ansible --version
+  changed_when: false
+  ignore_errors: true
+  register: ansible_version_check_cmd
+
+- name: Fail if Ansible not found
+  ansible.builtin.fail:
+    msg: "Unable to find Ansible Version"
+  when:
+    - ansible_version_check_cmd.rc != 0

@@ -1,0 +1,14 @@
+---
+
+- name: Check Packer Version
+  ansible.builtin.command:
+    cmd: packer -v
+  changed_when: false
+  ignore_errors: true
+  register: packer_version
+
+- name: Fail if Packer not found
+  ansible.builtin.fail:
+    msg: "Unable to find Packer Version"
+  when:
+    - packer_version.rc != 0 or not (packer_version.stdout | regex_search("^(\*|\d+(\.\d+){0,2}(\.\*)?)$"))

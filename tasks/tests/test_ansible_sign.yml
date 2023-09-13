@@ -1,0 +1,14 @@
+---
+
+- name: Check Ansible Sign Version
+  ansible.builtin.command:
+    cmd: ansible-sign --version
+  changed_when: false
+  ignore_errors: true
+  register: ansible_sign_version
+
+- name: Fail if Ansible Sign not found
+  ansible.builtin.fail:
+    msg: "Unable to find Ansible Sign Version"
+  when:
+    - ansible_sign_version.rc != 0 or not (ansible_sign_version.stdout | regex_search("^ansible-sign (\*|\d+(\.\d+){0,2}(\.\*)?)$"))

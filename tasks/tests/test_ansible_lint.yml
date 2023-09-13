@@ -1,0 +1,26 @@
+---
+
+- name: Check Ansible Lint Version
+  ansible.builtin.command:
+    cmd: ansible-lint --version
+  changed_when: false
+  ignore_errors: true
+  register: ansible_lint_version
+
+- name: Fail if Ansible Lint not found
+  ansible.builtin.fail:
+    msg: "Unable to find Ansible Lint Version"
+  when:
+    - ansible_lint_version.rc != 0
+
+- name: Fail if Ansible Lint not found
+  ansible.builtin.fail:
+    msg: "Unable to find Ansible Lint Version"
+  when:
+    - '"ansible-lint " not in ansible_lint_version.stdout'
+
+- name: Fail if Ansible Lint not found
+  ansible.builtin.fail:
+    msg: "Unable to find Ansible Lint Version"
+  when:
+    - '"using" not in ansible_lint_version.stdout and "ansible-core" not in ansible_lint_version.stdout'

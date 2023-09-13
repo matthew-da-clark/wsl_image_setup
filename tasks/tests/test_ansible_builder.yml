@@ -1,0 +1,14 @@
+---
+
+- name: Check Ansible Builder Version
+  ansible.builtin.command:
+    cmd: ansible-builder --version
+  changed_when: false
+  ignore_errors: true
+  register: ansible_builder_version
+
+- name: Fail if Ansible Builder not found
+  ansible.builtin.fail:
+    msg: "Unable to find Ansible Builder Version"
+  when:
+    - ansible_builder_version.rc != 0 or not (ansible_builder_version.stdout | regex_search("^(\*|\d+(\.\d+){0,2}(\.\*)?)$"))

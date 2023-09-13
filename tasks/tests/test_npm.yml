@@ -1,0 +1,14 @@
+---
+
+- name: Check NPM Version
+  ansible.builtin.command:
+    cmd: npm --version
+  changed_when: false
+  ignore_errors: true
+  register: npm_version_check_cmd
+
+- name: Fail if NPM not found
+  ansible.builtin.fail:
+    msg: "Unable to find NPM"
+  when:
+    - npm_version_check_cmd.rc != 0 or not (npm_version_check_cmd.stdout | regex_search("^(\*|\d+(\.\d+){0,2}(\.\*)?)$"))

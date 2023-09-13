@@ -1,0 +1,10 @@
+---
+
+- name: Check Google Availability
+  ansible.builtin.uri:
+    url: "https://www.google.ca/"
+    status_code: 200
+  register: google_ping_test_result
+  until: "google_ping_test_result is not failed"
+  retries: 5   # Added retry due to sometimes getting HTTP Error 429: Too Many Requests
+  delay: 5
