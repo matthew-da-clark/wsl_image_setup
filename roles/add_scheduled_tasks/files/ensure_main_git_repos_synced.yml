@@ -1,0 +1,79 @@
+---
+
+- name: Play - Ensure Latest Scheduled Tasks Are on System And Dependencies
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Ensure Network Is Available
+      ansible.builtin.include_role:
+        name: network_test
+      vars: #  Dont really care as much about this failing especially since can occur when left machine on the weekend and they are off vpn.
+        v_network_test_url_to_check: "{{ network_connectivity_test_url }}"
+        v_network_test_minutes_to_wait: "{{ 23 * 60 }}"  #  Daily Job so try over 23 hours and let fail to run to next day
+        v_network_test_cause_failure: true
+        v_network_test_return_varname_successful: network_test_was_successful
+
+    - name: Add Known Hosts But Ignore If Have Errors
+      block:
+        - name: Add Known Hosts Role
+          ansible.builtin.include_role:
+            name: add_known_hosts
+          vars:
+            v_add_known_hosts_host_list: "{{ ssh_known_hosts }}"
+            v_add_known_hosts_dev_username: "{{ dev_username }}"
+      rescue:
+        - name: Unable To Ensure All Wanted Hosts Are Known
+          ansible.builtin.debug:
+            msg: "Error with ensuring known hosts"
+
+    - name: Get Information About System To Record Success or Failure
+      ansible.builtin.include_role:
+        name: get_wsl_vars
+      vars:
+        v_get_wsl_vars_wsl_version_file: "{{ wsl_version_file }}"
+        v_get_wsl_vars_wsl_patchnum_file: "{{ wsl_patchnum_file }}"
+        v_get_wsl_vars_return_varname_user_with_domainname: "wsl_userinfo"
+        v_get_wsl_vars_return_varname_computername: "wsl_computername"
+        v_get_wsl_vars_return_varname_wsl_version: "wsl_version"
+        v_get_wsl_vars_return_varname_wsl_distroname: "wsl_distname"
+
+    - name: Get Remote URL - (Https vs SSH)
+      ansible.builtin.command:
+        cmd: git config --get remote.origin.url
+        chdir: "{{ root_folder_for_repo }}"
+      changed_when: false
+      ignore_errors: true
+      register: git_current_remote_origin_url_wsl_image_setup
+
+    - name: Get Current Branch Name - Should Be Main but incase doing development
+      ansible.builtin.command:
+        cmd: git rev-parse --abbrev-ref HEAD
+        chdir: "{{ root_folder_for_repo }}"
+      changed_when: false
+      ignore_errors: true
+      register: git_current_branch_name_wsl_image_setup
+
+    - name: Just ensuring the repo checkout exists
+      ansible.builtin.git:
+        repo: "{{ git_current_remote_origin_url_wsl_image_setup.stdout }}"
+        dest: "{{ root_folder_for_repo }}"
+        update: true
+        force: false
+        version: "{{ git_current_branch_name_wsl_image_setup.stdout | default('main') }}"
+      ignore_errors: true
+      register: gitrepo_setup_sync_attempt
+      become: true
+      become_user: "{{ dev_username }}"   # Switch User in case SSH being used and can leverage SSH Key
+
+    - name: Get Git Patching Repo
+      ansible.builtin.git:
+        repo: "{{ git_patching_repo.repo_ssh }}"
+        version: "{{ git_patching_repo.version }}"
+        dest: "{{ git_patching_repo.dest }}"
+        accept_newhostkey: true
+        update: true
+        force: true
+      environment:
+        GIT_TERMINAL_PROMPT: "0"    # reports "terminal prompts disabled" on missing password
+      ignore_errors: true
+      register: gitrepo_patching_sync_attempt

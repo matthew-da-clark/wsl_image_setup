@@ -1,0 +1,5 @@
+---
+# vars file for sshkeys_wincopy
+v_sshkeys_wincopy_username: "required"
+v_sshkeys_wincopy_admin_group: "required"
+v_sshkeys_wincopy_windows_userprofile: "required"

@@ -1,0 +1,7 @@
+---
+# vars file for network_test
+v_network_test_url_to_check: "required"
+v_network_test_minutes_to_wait: "{{ 60 * 24 }}"
+v_network_test_cause_failure: true
+v_network_test_return_varname_successful: "rv_network_test_successful"
+rv_network_test_successful: false

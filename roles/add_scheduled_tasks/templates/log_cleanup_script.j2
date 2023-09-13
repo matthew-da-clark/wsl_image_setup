@@ -1,0 +1,2 @@
+#!/bin/sh
+ansible-playbook {{ v_add_scheduled_tasks_rootdir_for_cron }}/playbooks/log_cleanup.yml -vvv >> {{ v_add_scheduled_tasks_rootdir_for_cron }}/logs/daily.log_cleanup.$(date +%Y%m%d_%H%M%S).log

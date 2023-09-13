@@ -67,12 +67,13 @@
     loop_var: install_ansible_navigator_registry_item
   no_log: true
 
-- name: "Pull podman image - {{ install_ansible_navigator_podman_item.name }}"
-  ansible.builtin.include_tasks:
-    file: install_pod.yml
-  loop: "{{ v_install_ansible_navigator_pods_to_pull }}"
-  loop_control:
-    loop_var: install_ansible_navigator_podman_item
+# TODO: Need to fix the issue with this not pulling properly. May need to create auth file 
+# - name: "Pull podman image - {{ install_ansible_navigator_podman_item.name }}"
+#   ansible.builtin.include_tasks:
+#     file: install_pod.yml
+#   loop: "{{ v_install_ansible_navigator_pods_to_pull }}"
+#   loop_control:
+#     loop_var: install_ansible_navigator_podman_item
 
 - name: Logout of registry
   containers.podman.podman_logout:

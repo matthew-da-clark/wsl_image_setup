@@ -1,0 +1,2 @@
+#!/bin/sh
+ansible-playbook {{ v_add_scheduled_tasks_wsl_patching_playbook }} -vvv >> {{ v_add_scheduled_tasks_rootdir_for_cron }}/logs/weekly.patch_wsl_system.$(date +%Y%m%d_%H%M%S).log

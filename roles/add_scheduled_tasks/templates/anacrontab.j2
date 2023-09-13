@@ -1,0 +1,14 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+HOME=/root
+LOGNAME=root
+# Random Delay Set to 25 since cron will check anacrontab every 30 minutes.
+RANDOM_DELAY=25
+ANSIBLE_ROLES_PATH={{ v_add_scheduled_tasks_rootdir }}/wsl_image_setup/roles
+ANSIBLE_INVENTORY={{ v_add_scheduled_tasks_rootdir }}/wsl_image_setup/inventory
+
+# These replace cron's entries
+# delay will be be 4 minutes + RANDOM_DELAY for cron.daily
+1  4  cron.day    run-parts {{ v_add_scheduled_tasks_rootdir }}/cron_jobs/etc/cron.daily/
+7  0  cron.wek    run-parts {{ v_add_scheduled_tasks_rootdir }}/cron_jobs/etc/cron.weekly/
+30 0  cron.mon    run-parts {{ v_add_scheduled_tasks_rootdir }}/cron_jobs/etc/cron.monthly/

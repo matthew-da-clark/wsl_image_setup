@@ -1,0 +1,28 @@
+---
+- name: Network Test Block - Allow Error Handling
+  block:
+    - name: Ensure have Network Connectivity
+      ansible.builtin.uri:
+        url: "{{ v_network_test_url_to_check }}"
+        status_code: 200
+        timeout: 20
+      register: v_network_test_ping_result
+      until: "v_network_test_ping_result is not failed"
+      retries: "{{ v_network_test_minutes_to_wait }}"
+      delay: 60    #  Wait a minute before trying again
+
+    - name: Set Successful Variable To True
+      ansible.builtin.set_fact:
+        rv_network_test_successful: true
+  rescue:
+    - name: Set Successful Variable To False
+      ansible.builtin.set_fact:
+        rv_network_test_successful: false
+
+    - name: Cause Failure if told to by caller
+      ansible.builtin.fail:
+      when: v_network_test_cause_failure
+  always:
+    - name: Update Return Variable - Username
+      ansible.builtin.set_fact:
+        {"{{ v_network_test_return_varname_successful }}": "{{ rv_network_test_successful }}"}

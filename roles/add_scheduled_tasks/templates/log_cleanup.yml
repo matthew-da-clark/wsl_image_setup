@@ -1,0 +1,21 @@
+---
+
+- name: Perform Log Cleanup Activities
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Find Log Files
+      ansible.builtin.find:
+        paths: "{{ v_add_scheduled_tasks_rootdir_for_cron }}/logs"
+        age: 60d
+        recurse: true
+        patterns: "*.log"
+      register: files_matched
+
+    - name: Remove files
+      ansible.builtin.file:
+        path: "{{ '{{ item.path }}' }}"
+        state: absent
+      loop: "{{ '{{ files_matched.files | flatten(levels=1) }}' }}"
+      loop_control:
+        label: "{{ '{{ item.path }}' }}"

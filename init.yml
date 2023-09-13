@@ -141,6 +141,19 @@
       become_user: "{{ dev_username }}"
       become: true
 
+    - name: Add Scheduled Tasks
+      ansible.builtin.include_role:
+        name: add_scheduled_tasks
+      vars:
+        v_add_scheduled_tasks_rootdir: "{{ root_folder_for_dev }}"
+        v_add_scheduled_tasks_rootdir_for_cron: "{{ root_folder_for_cronjobs }}"
+        v_add_scheduled_tasks_dev_username: "{{ dev_username }}"
+        v_add_scheduled_tasks_wsl_imagename_version: "{{ wsl_imagename_version }}"
+        v_add_scheduled_tasks_git_patching_repo: "{{ git_patching_repo }}"
+        v_add_scheduled_tasks_wsl_patching_playbook: "{{ wsl_patching_playbook }}"
+        v_add_scheduled_tasks_wsl_version_file: "{{ wsl_version_file }}"
+        v_add_scheduled_tasks_wsl_patchnum_file: "{{ wsl_patchnum_file }}"
+
     - name: Git Template Setup
       ansible.builtin.include_role:
         name: add_global_git_templates

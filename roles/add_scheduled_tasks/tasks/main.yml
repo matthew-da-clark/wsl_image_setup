@@ -1,0 +1,115 @@
+---
+- name: Create Initial Directory
+  ansible.builtin.file:
+    path: "{{ add_scheduled_tasks_dir_item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ v_add_scheduled_tasks_dev_username }}"
+    group: "{{ v_add_scheduled_tasks_dev_username }}"
+  loop:
+    - "{{ v_add_scheduled_tasks_rootdir }}"
+    - "{{ v_add_scheduled_tasks_rootdir_for_cron }}"
+    - "{{ v_add_scheduled_tasks_rootdir_for_cron }}/logs"
+    - "{{ v_add_scheduled_tasks_rootdir_for_cron }}/playbooks"
+    - "{{ v_add_scheduled_tasks_rootdir_for_cron }}/etc"
+    - "{{ v_add_scheduled_tasks_rootdir_for_cron }}/etc/cron.daily"
+    - "{{ v_add_scheduled_tasks_rootdir_for_cron }}/etc/cron.monthly"
+    - "{{ v_add_scheduled_tasks_rootdir_for_cron }}/etc/cron.weekly"
+  loop_control:
+    loop_var: add_scheduled_tasks_dir_item
+
+- name: Get Git Patching Repo
+  ansible.builtin.git:
+    repo: "{{ v_add_scheduled_tasks_git_patching_repo.repo }}"
+    version: "{{ v_add_scheduled_tasks_git_patching_repo.version }}"
+    dest: "{{ v_add_scheduled_tasks_git_patching_repo.dest }}"
+    accept_newhostkey: true
+  environment:
+    GIT_TERMINAL_PROMPT: "0"    # reports "terminal prompts disabled" on missing password
+
+- name: Templates Files To Script or playbook directories and main anacrontab
+  ansible.builtin.template:
+    src: "{{ add_scheduled_tasks_scheduled_task_template_item.src }}"
+    dest: "{{ add_scheduled_tasks_scheduled_task_template_item.dest }}"
+    mode: "{{ add_scheduled_tasks_scheduled_task_template_item.mode }}"
+    owner: "{{ add_scheduled_tasks_scheduled_task_template_item.owner }}"
+    group: "{{ add_scheduled_tasks_scheduled_task_template_item.group }}"
+  loop:
+    - { src: "{{ role_path }}/templates/anacrontab.j2",
+        dest: "/etc/anacrontab",
+        mode: '0644',
+        owner: 'root',
+        group: 'root'}
+    - { src: "{{ role_path }}/templates/ensure_main_git_repos_synced_script.j2",
+        dest: "{{ v_add_scheduled_tasks_rootdir_for_cron }}/etc/cron.daily/ensure_main_git_repos_synced_script",
+        mode: '0755',
+        owner: 'root',
+        group: 'root'}
+    - { src: "{{ role_path }}/templates/log_cleanup.yml",
+        dest: "{{ v_add_scheduled_tasks_rootdir_for_cron }}/playbooks/log_cleanup.yml",
+        mode: '0755',
+        owner: 'root',
+        group: 'root'}
+    - { src: "{{ role_path }}/templates/log_cleanup_script.j2",
+        dest: "{{ v_add_scheduled_tasks_rootdir_for_cron }}/etc/cron.daily/log_cleanup_script",
+        mode: '0755',
+        owner: 'root',
+        group: 'root'}
+    - { src: "{{ role_path }}/templates/patch_wsl_system_script.j2",
+        dest: "{{ v_add_scheduled_tasks_rootdir_for_cron }}/etc/cron.weekly/patch_wsl_system_script",
+        mode: '0755',
+        owner: 'root',
+        group: 'root'}
+    - { src: "{{ role_path }}/templates/wsl_version.j2",
+        dest: "{{ v_add_scheduled_tasks_wsl_version_file }}",
+        mode: '0644',
+        owner: 'root',
+        group: 'root'}
+  loop_control:
+    loop_var: add_scheduled_tasks_scheduled_task_template_item
+
+- name: Copy Files To Script or playbook directories
+  ansible.builtin.copy:
+    src: "{{ add_scheduled_tasks_scheduled_task_file_item.src }}"
+    dest: "{{ add_scheduled_tasks_scheduled_task_file_item.dest }}"
+    mode: "{{ add_scheduled_tasks_scheduled_task_file_item.mode }}"
+    owner: "{{ add_scheduled_tasks_scheduled_task_file_item.owner }}"
+    group: "{{ add_scheduled_tasks_scheduled_task_file_item.group }}"
+  loop:
+    - { src: "{{ role_path }}/files/ensure_main_git_repos_synced.yml",
+        dest: "{{ v_add_scheduled_tasks_rootdir_for_cron }}/playbooks/ensure_main_git_repos_synced.yml",
+        mode: '0755',
+        owner: 'root',
+        group: 'root'}
+    - { src: "{{ role_path }}/files/wsl_patch_number",
+        dest: "{{ v_add_scheduled_tasks_wsl_patchnum_file }}",
+        mode: '0644',
+        owner: 'root',
+        group: 'root'}
+  loop_control:
+    loop_var: add_scheduled_tasks_scheduled_task_file_item
+
+- name: Remove some basic installed anacron files
+  ansible.builtin.file:
+    path: "{{ add_scheduled_tasks_scheduled_task_remove_file_item }}"
+    state: absent
+  loop:
+    - /etc/cron.d/anacron
+    - /etc/cron.daily/0anacron
+    - /etc/cron.weekly/0anacron
+    - /etc/cron.monthly/0anacron
+    - /var/spool/anacron/cron.day
+    - /var/spool/anacron/cron.wek
+    - /var/spool/anacron/cron.mon
+  loop_control:
+    loop_var: add_scheduled_tasks_scheduled_task_remove_file_item
+
+- name: Ensure Anacrontab is ran every half hour
+  ansible.builtin.cron:
+    name: "Run Anacrontab Every 30 Mins"
+    minute: "10,40"
+    hour: "0-23"
+    day: "*"
+    weekday: "*"
+    month: "*"
+    job: " /usr/sbin/anacron -s > /dev/null 2>&1"

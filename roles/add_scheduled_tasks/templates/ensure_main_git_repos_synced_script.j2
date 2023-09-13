@@ -1,0 +1,2 @@
+#!/bin/sh
+ansible-playbook {{ v_add_scheduled_tasks_rootdir_for_cron }}/playbooks/ensure_main_git_repos_synced.yml -vvv >> {{ v_add_scheduled_tasks_rootdir_for_cron }}/logs/daily.ensure_main_git_repos_synced.$(date +%Y%m%d_%H%M%S).log

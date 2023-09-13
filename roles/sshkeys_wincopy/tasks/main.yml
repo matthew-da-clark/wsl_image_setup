@@ -1,0 +1,34 @@
+---
+- name: Get stats of the FS object
+  ansible.builtin.find:
+    paths: "/mnt/{{ v_sshkeys_wincopy_windows_userprofile | regex_replace('C:', 'c') | regex_replace('\\\\', '/') }}/.ssh"
+    patterns: "*"
+    file_type: file
+    recurse: false
+  register: v_sshkeys_wincopy_sshfiles
+
+- name: Debug ssh files
+  ansible.builtin.debug:
+    var: v_sshkeys_wincopy_sshfiles.files
+
+- name: Create ssh directory
+  ansible.builtin.file:
+    path: "/home/{{ v_sshkeys_wincopy_username }}/.ssh"
+    owner: "{{ v_sshkeys_wincopy_username }}"
+    group: "{{ v_sshkeys_wincopy_admin_group }}"
+    state: directory
+    mode: '0775'
+  loop: "{{ v_sshkeys_wincopy_sshfiles.files | list }}"
+  loop_control:
+    loop_var: sshkeys_wincopy_sshfile_item
+
+- name: Create a hard link for ssh keys
+  ansible.builtin.copy:
+    src: "{{ sshkeys_wincopy_sshfile_item.path }}"
+    dest: "/home/{{ v_sshkeys_wincopy_username }}/.ssh/{{ sshkeys_wincopy_sshfile_item.path | basename }}"
+    owner: "{{ v_sshkeys_wincopy_username }}"
+    group: "{{ v_sshkeys_wincopy_admin_group }}"
+    mode: '0600'
+  loop: "{{ v_sshkeys_wincopy_sshfiles.files | list }}"
+  loop_control:
+    loop_var: sshkeys_wincopy_sshfile_item

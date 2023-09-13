@@ -1,0 +1,14 @@
+---
+# vars file for add_scheduled_tasks
+v_add_scheduled_tasks_rootdir: "required"
+v_add_scheduled_tasks_rootdir_for_cron: "required"
+v_add_scheduled_tasks_wsl_patching_playbook: "required"
+v_add_scheduled_tasks_wsl_version_file: "required"
+v_add_scheduled_tasks_wsl_patchnum_file: "required"
+v_add_scheduled_tasks_dev_username: "required"
+v_add_scheduled_tasks_wsl_imagename_version: "required"
+v_add_scheduled_tasks_git_patching_repo:
+  repo: "required"
+  repo_ssh: "required"
+  version: "required"
+  dest: "required"
