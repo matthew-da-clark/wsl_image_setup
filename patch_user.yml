@@ -1,0 +1,116 @@
+---
+- name: Initialize WSL Environment
+  hosts: localhost
+  gather_facts: true
+  vars:
+    windows_userprofile: "{{ lookup('env','USERPROFILE') }}"
+    ev_fix_ansible_navigator: "n"
+    ev_git_username: "extravar"
+    ev_git_email: "extravar"
+    ev_git_use_ssh: "extravar"
+    ev_vscode_settings_refresh: "n"
+    ev_vscode_extensions_refresh: "n"
+    ev_aah_username: "extravar"
+    ev_aah_password: "extravar"
+  tasks:
+    - name: "Fail if not executed by {{ dev_username }}"
+      ansible.builtin.command: whoami
+      changed_when: false
+      register: whoami
+      failed_when: 'dev_username not in whoami.stdout'
+
+    - name: Fix for ansible-navigator - Install ansible-navigator python package
+      ansible.builtin.pip:
+        name: ansible-navigator
+        extra_args: --user
+      when: ev_fix_ansible_navigator == "y"
+
+    - name: Fix for ansible-navigator - Ensure export path in profile
+      ansible.builtin.lineinfile:
+        dest: "/home/{{ dev_username }}/.profile"
+        state: present
+        regexp: '^%export PATH=/home/{{ dev_username }}/.local/bin'
+        line: 'export PATH=/home/{{ dev_username }}/.local/bin:$PATH'
+        insertbefore: BOF
+      when: ev_fix_ansible_navigator == "y"
+
+    - name: Copy SSH Keys from Windows
+      ansible.builtin.include_role:
+        name: sshkeys_wincopy
+      vars:
+        v_sshkeys_wincopy_username: "{{ dev_username }}"
+        v_sshkeys_wincopy_admin_group: "{{ admin_group }}"
+        v_sshkeys_wincopy_windows_userprofile: "{{ windows_userprofile }}"
+      when: ev_git_use_ssh == "y"
+
+    - name: Update git repos to use ssh instead of ssh
+      community.general.git_config:
+        name: remote.origin.url
+        value: "{{ item.repo_ssh }}"
+        repo: "{{ item.dest }}"
+        scope: local
+      when: ev_git_use_ssh == "y" and item.patch_user_update_to_ssh
+      loop: "{{ git_repo_to_add }}"
+
+    - name: Update global git user.name
+      community.general.git_config:
+        name: user.name
+        scope: global
+        value: "{{ ev_git_username }}"
+      when: ev_git_username != "extravar"
+
+    - name: Update global git user.email
+      community.general.git_config:
+        name: user.email
+        scope: global
+        value: "{{ ev_git_email }}"
+      when: ev_git_email != "extravar"
+
+    - name: Install VS Code Extension
+      ansible.builtin.command: "code --install-extension {{ item }}"
+      register: vs_code_extension_output
+      changed_when: "'is already installed.' not in vs_code_extension_output.stdout"
+      failed_when:
+        - "'was successfully installed' not in vs_code_extension_output.stdout"
+        - "'is already installed.' not in vs_code_extension_output.stdout"
+      loop: "{{ visual_studio_code_extensions }}"
+      when: ev_vscode_extensions_refresh == "y"
+
+    - name: Remove Settings File For VS Code To Help With Forcing Refresh
+      ansible.builtin.file:
+        path: "{{ root_folder_for_dev }}/.vscode/settings.json"
+        state: absent
+      when: ev_vscode_settings_refresh == "y"
+
+    - name: Touch Default VS Code Settings File Prior To Update
+      ansible.builtin.file:
+        path: "{{ root_folder_for_dev }}/default_settings/vscode/settings.json"
+        state: touch
+        mode: '0644'
+        owner: "{{ dev_username }}"
+        group: "{{ dev_username }}"
+      when: ev_vscode_settings_refresh == "y"
+
+    - name: Copy Default VS Code Settings File To Force Update
+      ansible.builtin.copy:
+        src: "{{ root_folder_for_dev }}/default_settings/vscode/settings.json"
+        dest: "{{ root_folder_for_dev }}/.vscode/settings.json"
+        mode: '0644'
+        owner: "{{ dev_username }}"
+        group: "{{ dev_username }}"
+      when: ev_vscode_settings_refresh == "y"
+
+    - name: Setup VS Code Workspace - Remove First Startup Task
+      ansible.builtin.include_role:
+        name: vs_code_workspace_setup
+      vars:
+        v_vs_code_workspace_setup_username: "{{ dev_username }}"
+        v_vs_code_workspace_setup_rootdir: "{{ root_folder_for_dev }}"
+        v_vs_code_workspace_setup_root_workspace_dir: "{{ root_folder_for_workspace }}"
+        v_vs_code_workspace_setup_root_setuprepo_dir: "{{ root_folder_for_repo }}"
+        v_vs_code_workspace_setup_root_patchrepo_dir: "{{ git_patching_repo.dest }}"
+        v_vs_code_workspace_setup_wsl_doc_website: "{{ wsl_doc_website }}"
+        v_vs_code_setup_ansible_default_execution_environment_image: "{{ visual_studio_code_ansible_default_execution_environment_image }}"
+        v_vs_code_setup_ansible_lint_config_file: "{{ ansible_lint_config_file }}"
+        v_vs_code_workspace_setup_color_scheme: "{{ visual_studio_code_color_scheme }}"
+        v_vs_code_workspace_setup_remove_startup_task: true
