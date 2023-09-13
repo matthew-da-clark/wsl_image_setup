@@ -64,3 +64,18 @@ cd /wsl/wsl_image_setup
 
 # Ensure tests all pass - Run as iacdevusr
 ansible-playbook test_build.yml --inventory inventory
+
+# Clear command history to prevent others from calling commands unintentionally - iacdevusr
+cat /dev/null > ~/.bash_history && history -c && exit
+cat /dev/null > ~/.bash_history && history -c && exit
+
+# Ensure the system is up to date after all the installs
+apt-get update
+apt full-upgrade -y
+
+# Clear command history to prevent others from calling commands unintentionally - root
+cat /dev/null > ~/.bash_history && history -c && exit
+
+# Perform export and compression of WSL distribution for community
+# wsl --export <distroname> <distroname>.tar
+# wsl.exe gzip <distroname>.tar
