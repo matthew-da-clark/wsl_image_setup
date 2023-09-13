@@ -49,7 +49,7 @@
         value: "{{ item.repo_ssh }}"
         repo: "{{ item.dest }}"
         scope: local
-      when: ev_git_use_ssh == "y" and item.patch_user_update_to_ssh
+      when: ev_git_use_ssh == "y"
       loop: "{{ git_repo_to_add }}"
 
     - name: Update global git user.name
