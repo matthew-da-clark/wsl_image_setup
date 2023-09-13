@@ -7,9 +7,9 @@ fi
 # Remove user created in base
 deluser --remove-home matt
 
-# WSL Default Settings
-echo '[boot]' > /etc/wsl.conf
-echo 'systemd=true' >> /etc/wsl.conf
+# WSL Default Settings - This does cause some issues; need time to figure out systemd integration properly.
+# echo '[boot]' > /etc/wsl.conf
+# echo 'systemd=true' >> /etc/wsl.conf
 
 # Get the system up to date
 apt-get update
@@ -54,6 +54,10 @@ npm install -g docusaurus --loglevel verbose
 npm install -g env-cmd --loglevel verbose
 
 # Install Default EEI - Move into playbook in the future when have time to deal with issue
+# Do need to do a 
+sudo mkdir /run/user/1000
+sudo chown iacdevusr:iacdevusr /run/user/1000
+podman login -u $ANSIBLE_REDHAT_USER -p $ANSIBLE_REDHAT_TOKEN registry.redhat.io
 podman pull registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:1.0.0-393
 
 # Need to exit out of WSL and shut it down to ensure proper loading of WSL environment vars
