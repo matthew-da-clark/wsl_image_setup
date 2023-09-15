@@ -83,6 +83,7 @@ python_modernized_packages:
   - python-memcached
 system_packages:
   - anacron
+  - awscli
   - default-jre
   - default-jdk
   - socat
